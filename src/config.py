@@ -54,6 +54,7 @@ Version: {self.VERSION}
         return self.__getattribute__(__key)
 
     def user_config_create(self):
+        '''Create a user configuration file'''
 
         config = configparser.ConfigParser()
 
@@ -66,6 +67,7 @@ Version: {self.VERSION}
             config.write(file)
 
     def user_config_load(self):
+        '''Load user configurations from a file'''
 
         config = configparser.ConfigParser()
         config.read(os.path.join(self.DATA_DIR, self.FILE_CONFIG))
@@ -81,6 +83,12 @@ Version: {self.VERSION}
                 self[option.upper()] = value
 
     def user_config_update(self, key: str, value: Any):
+        '''Update a user configuration file with the given key and value pair.
+
+        Args:
+            key (str): The configuration key.
+            value (Any): The configuration value.
+        '''
 
         config = configparser.ConfigParser()
         config.read(os.path.join(self.DATA_DIR, self.FILE_CONFIG))

@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+'''
+application
+=======
+'''
+
 from datetime import datetime
 import os
+import sys
 
+# pylint: disable=no-name-in-module
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import (QApplication,
@@ -28,6 +36,15 @@ class Monitor(QThread):
         self._action = action
 
     def logger(self, string):
+        '''Write a log string to a file.
+
+        The file is located in the `CONFIG.DIR_LOGS` directory and is named
+        'PyProcessWatcher_<current date>.txt'. If the directory does not
+        exist, it will be created.
+
+        Args:
+            string (str): The string to write to the log file.
+        '''
 
         if not os.path.exists(CONFIG.DIR_LOGS):
             os.mkdir(CONFIG.DIR_LOGS)
@@ -37,8 +54,15 @@ class Monitor(QThread):
             log.write(string+'\n')
 
     def run(self):
+        '''
+        Overriden method from QThread. Is executed when the thread is started.
 
-        pythoncom.CoInitialize()
+        In this method, an infinite loop is used to update the ProcessMonitor
+        object and send the data to the main thread. When the logging is enabled,
+        the data is also written to a file.
+        '''
+
+        pythoncom.CoInitialize()  # pylint: disable=no-member
 
         monitor = ProcessMonitor(self._action)
 
@@ -116,25 +140,25 @@ class Application(QMainWindow):
         self.start_monitors()
 
     def init_dirs(self):
-        ''' Initialize dirs '''
+        '''Initialize directories'''
 
         CONFIG.SELF_PATH = os.path.abspath('.')
 
         os.makedirs(CONFIG.DATA_DIR, exist_ok=True)
 
         try:
-            os.chdir(sys._MEIPASS)
+            os.chdir(sys._MEIPASS)  # pylint: disable=protected-access
         except AttributeError:
             pass
 
     def init_files(self):
-        ''' Initialize files '''
+        '''Initialize files'''
 
         if not os.path.exists(os.path.join(CONFIG.DATA_DIR, CONFIG.FILE_CONFIG)):
             CONFIG.user_config_create()
 
     def init_config(self):
-        ''' Initialize configurations '''
+        '''Initialize configurations'''
 
         CONFIG.user_config_load()
 
@@ -142,6 +166,7 @@ class Application(QMainWindow):
             CONFIG['LOGGING'] = False
 
     def init_ui(self):
+        '''Initialize the user interface components'''
 
         self.setCentralWidget(self.table)
 
@@ -205,6 +230,7 @@ class Application(QMainWindow):
         self.setWindowTitle(f'{CONFIG.APP_NAME}, version {CONFIG.VERSION}')
 
     def start_monitors(self):
+        '''Start monitoring processes for creation and deletion events'''
 
         self.creation = Monitor('creation')
         self.creation.date_signal.connect(self.table.add_event)
@@ -218,6 +244,7 @@ class Application(QMainWindow):
         self.progress_bar.setMaximum(0)
 
     def stop_monitors(self):
+        '''Stop monitoring processes for creation and deletion events'''
 
         self.creation.terminate()
         self.deletion.terminate()
@@ -226,6 +253,7 @@ class Application(QMainWindow):
         self.progress_bar.setMaximum(1)
 
     def logging(self):
+        '''Start or stop logging'''
 
         if self.action_logging.isChecked():
             CONFIG['LOGGING'] = True
@@ -235,6 +263,7 @@ class Application(QMainWindow):
             self.status_label.setText('LOGGING IS STOP')
 
     def set_logs_dir(self):
+        '''Select logs folder'''
 
         dir = QFileDialog.getExistingDirectory(
             self, 'Select logs folder', 'C:\\')
@@ -245,8 +274,6 @@ class Application(QMainWindow):
 
 
 if __name__ == '__main__':
-
-    import sys
 
     app = QApplication(sys.argv)
 

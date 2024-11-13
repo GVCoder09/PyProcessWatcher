@@ -75,8 +75,9 @@ class ProcessMonitor():
             else:
                 self._process_property['Owner'] = f'{
                     process.GetOwner()[0]}\\{process.GetOwner()[2]}'
-        except:
+        except Exception:
             self._process_property['Owner'] = 'Access denied'
+
         self._process_property['Privileges'] = self.get_process_privileges(
             process.ProcessID)
         self._process_property['CommandLine'] = process.CommandLine
@@ -95,6 +96,7 @@ class ProcessMonitor():
     def get_process_privileges(self, pid):
 
         try:
+            # pylint: disable=c-extension-no-member
             hproc = win32api.OpenProcess(
                 win32con.PROCESS_QUERY_INFORMATION, False, pid
             )
